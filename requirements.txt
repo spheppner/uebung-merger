@@ -1,0 +1,5 @@
+pymupdf>=1.24.3
+PySide6
+# optional, für den Scan-Filter
+numpy
+opencv-python-headless
