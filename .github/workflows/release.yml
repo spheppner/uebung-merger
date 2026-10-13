@@ -1,0 +1,39 @@
+name: Windows-EXE bauen
+
+# Bei einem Tag "vX.Y.Z" wird die EXE gebaut und an das Release gehängt.
+# Mit "Run workflow" kann man sie auch nur testweise bauen.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt pyinstaller pillow
+      - run: python scripts/build_exe.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: release/*.exe
+      - name: An das Release anhängen (falls dort noch keine EXE liegt)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1             || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          existing=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '[.assets[].name | select(endswith(".exe"))] | length')
+          if [ "$existing" = "0" ]; then
+            gh release upload "$GITHUB_REF_NAME" release/*.exe
+          else
+            echo "Release hat schon eine EXE – nichts hochgeladen."
+          fi

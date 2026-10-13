@@ -14,6 +14,7 @@ from PySide6.QtGui import (
     QDragMoveEvent,
     QDropEvent,
     QFont,
+    QKeyEvent,
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -40,6 +41,7 @@ class TaskTree(QTreeWidget):
 
     # (gezogene Art "task"/"mark", ID, Ziel-Aufgabe oder None, Einfügeposition oder None)
     drop_requested = Signal(str, int, object, object)
+    delete_requested = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -54,6 +56,12 @@ class TaskTree(QTreeWidget):
         self._collapsed: set[int] = set()
         self.itemCollapsed.connect(lambda it: self._remember(it, True))
         self.itemExpanded.connect(lambda it: self._remember(it, False))
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802
+        if event.key() == Qt.Key.Key_Delete:
+            self.delete_requested.emit()
+        else:
+            super().keyPressEvent(event)
 
     _MIME = "application/x-qabstractitemmodeldatalist"
 
@@ -131,7 +139,7 @@ class TaskTree(QTreeWidget):
             has_l = bool(project.marks_of(task, Side.LOESUNG))
             title = f"Aufgabe {n}"
             if task.id == pinned_task:
-                title = "📌 " + title
+                title = "◉ " + title
             if task.stacked and not task.solo:
                 title += "   ⇵ untereinander"
             if task.solo:

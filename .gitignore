@@ -14,3 +14,19 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Tools / Caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build (PyInstaller)
+*.spec
+*.exe
+release/
+
+# Virtuelle Umgebungen
+env/
+.env

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uebung-merger"
+dynamic = ["version"]
+description = "Angabe links, Lösung rechts – als A4-Querformat-PDF zum Beamen."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+keywords = ["pdf", "exercises", "study-tools", "pymupdf", "pyside6"]
+classifiers = [
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3",
+    "Topic :: Education",
+]
+dependencies = ["pymupdf>=1.24.3", "PySide6-Essentials"]
+
+[project.optional-dependencies]
+scan = ["numpy", "opencv-python-headless"]
+
+[project.gui-scripts]
+uebung-merger = "uebung_merger.app:main"
+
+[project.urls]
+Homepage = "https://github.com/spheppner/uebung-merger"
+Releases = "https://github.com/spheppner/uebung-merger/releases"
+
+[tool.setuptools]
+packages = ["uebung_merger"]
+
+[tool.setuptools.dynamic]
+version = { attr = "uebung_merger.__version__" }
+
+[tool.setuptools.package-data]
+uebung_merger = ["assets/*"]

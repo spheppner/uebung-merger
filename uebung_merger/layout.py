@@ -197,6 +197,7 @@ def build_output(
     pairs: list[Pair],
     opt: LayoutOptions,
     cache: FilterCache | None = None,
+    regions: list[tuple[int, int, pymupdf.Rect]] | None = None,
 ) -> pymupdf.Document:
     """Setzt alle Aufgaben in ein A4-Querformat-PDF.
 
@@ -211,6 +212,8 @@ def build_output(
         pairs: Die Aufgaben in Reihenfolge.
         opt: Layout-Einstellungen.
         cache: Optionaler Cache für gefilterte Bilder (beschleunigt die Vorschau).
+        regions: Wird, falls angegeben, gefüllt mit (Index der Aufgabe, Seitenindex,
+            belegter Bereich) je gesetzter Aufgabe, z. B. zum Hervorheben.
 
     Returns:
         Das neue Dokument (leer, wenn es keine Ausschnitte gibt).
@@ -240,7 +243,7 @@ def build_output(
             )
         seg_start = None
 
-    for pair in pairs:
+    for index, pair in enumerate(pairs):
         row = _row_layout(pair, opt, geo)
         if row is None:
             continue
@@ -264,6 +267,10 @@ def build_output(
         elif seg_start is None:
             seg_start = band_top
 
+        if regions is not None:
+            regions.append(
+                (index, out.page_count - 1, pymupdf.Rect(m, y, w - m, y + row.height))
+            )
         for pl in row.placed:
             doc = docs[pl.side]
             if doc is not None:

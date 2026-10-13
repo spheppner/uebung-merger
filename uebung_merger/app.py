@@ -55,6 +55,7 @@ Scan-Filter (optional, nur Lösung):
 
 Start:
     python -m uebung_merger [angabe.pdf] [loesung.pdf|bild.jpg ...]
+    python -m uebung_merger --version
 
 Abhängigkeiten:
     pip install "pymupdf>=1.24.3" PySide6
@@ -66,12 +67,16 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
 )
 
+from . import __version__
 from .main_window import MainWindow
 from .model import Side
+
+ICON = Path(__file__).parent / "assets" / "icon.png"
 
 
 def main() -> int:
@@ -79,7 +84,13 @@ def main() -> int:
 
     Argumente (optional): erste Datei = Angabe, alle weiteren = Lösung.
     """
+    if any(a in ("--version", "-V") for a in sys.argv[1:]):
+        print(f"Übung Merger {__version__}")
+        return 0
     app = QApplication(sys.argv)
+    app.setApplicationName("Übung Merger")
+    app.setApplicationVersion(__version__)
+    app.setWindowIcon(QIcon(str(ICON)))
     win = MainWindow()
     args = [Path(a) for a in sys.argv[1:]]
     if args:
