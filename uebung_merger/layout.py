@@ -97,14 +97,17 @@ def _row_layout(pair: Pair, opt: LayoutOptions, geo: _Geometry) -> _Row | None:
         ganze Seitenbreite; ist das zu hoch, wird beides gemeinsam so weit
         verkleinert, dass die Aufgabe auf eine Seite passt (zentriert).
     Zentriert (keine Lösung): nur die Angabe, mittig in Spaltenbreite.
+        Ebenso eine Aufgabe mit nur einer Lösung (ohne Angabe), mit Scan-Filter.
     """
-    if pair.centered:
-        pieces, total = _stack(pair.angabe, geo.col_w, opt)
+    only_loesung = bool(pair.loesung) and not pair.angabe
+    if pair.centered or only_loesung:
+        side = Side.LOESUNG if only_loesung else Side.ANGABE
+        pieces, total = _stack(pair.clips(side), geo.col_w, opt)
         if total <= 0:
             return None
         s = min(1.0, geo.usable_h / total)
         x = (geo.w - geo.col_w * s) / 2
-        placed, _ = _place_column(Side.ANGABE, pieces, x, 0, geo.col_w * s, s, opt)
+        placed, _ = _place_column(side, pieces, x, 0, geo.col_w * s, s, opt)
         return _Row(placed, total * s, two_columns=False)
 
     if pair.stacked:
